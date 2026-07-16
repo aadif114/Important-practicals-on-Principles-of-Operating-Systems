@@ -1,0 +1,47 @@
+from multiprocessing import Process, Queue
+import time
+import random
+
+# Producer function
+def producer(queue):
+    for i in range(5):
+        item = random.randint(1, 100)
+
+        if queue.full():
+            print("Error: The queue limit is exceeded.")
+        else:
+            print(f"Producer produced: {item}")
+            queue.put(item)
+
+        time.sleep(0.2)   # Producer is faster
+
+
+# Consumer function
+def consumer(queue): 
+    for i in range(5):
+        if not queue.empty():
+            item = queue.get()
+            print(f"Consumer consumed: {item}")
+        else:
+            print("Queue is empty. Consumer is waiting...")
+
+        time.sleep(1)   # Consumer is slower
+
+
+if __name__ == "__main__":
+    # Queue with maximum size of 3
+    q = Queue(maxsize=3)
+
+    # Create producer and consumer processes
+    p1 = Process(target=producer, args=(q,))
+    p2 = Process(target=consumer, args=(q,))
+
+    # Start processes
+    p1.start()
+    p2.start()
+
+    # Wait for both processes to finish
+    p1.join()
+    p2.join()
+
+    print("Producer and Consumer have finished.")
