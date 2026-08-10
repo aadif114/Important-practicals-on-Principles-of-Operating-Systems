@@ -1,0 +1,34 @@
+s112 = [('P1',0,5), ('P2',4,2), ('P3',5,4)]
+aditya = 2
+print("S112 Aditya Singh Code")
+# Round Robin
+t, rem, ct = 0, {x[0]:x[2] for x in s112}, {}
+queue = []
+i = 0
+
+while len(ct) < len(s112):
+    while i < len(s112) and s112[i][1] <= t:
+        queue.append(s112[i][0]); i += 1
+    if not queue:
+        t = p[i][1]; continue
+    x = queue.pop(0)
+    run = min(aditya, rem[x])
+    t += run; rem[x] -= run
+    while i < len(s112) and s112[i][1] <= t:
+        queue.append(s112[i][0]); i += 1
+    if rem[x]: queue.append(x)
+    else: ct[x] = t
+
+tat = {x: ct[x]-a for x,a,b in s112}
+wt = {x: tat[x]-b for x,a,b in s112}
+print("Round Robin  Avg Turnaround Time =", sum(tat.values())/3, "Avg Waiting Time =", sum(wt.values())/3)
+
+# FCFS
+t = 0
+tat = {}; wt = {}
+for x,a,b in s112:
+    t = max(t,a) + b
+    tat[x] = t-a
+    wt[x] = tat[x]-b
+
+print("FCFS Avg Turnaround Time =", sum(tat.values())/3, "Avg Waiting Time =", sum(wt.values())/3)
