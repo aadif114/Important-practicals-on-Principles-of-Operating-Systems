@@ -1,0 +1,117 @@
+import threading
+import time
+import random
+
+shared_data = 0
+
+resource = threading.Semaphore(1)   
+read_count_mutex = threading.Semaphore(1)  
+turnstile = threading.Semaphore(1) 
+
+read_count = 0
+
+
+
+def reader(reader_id):
+
+    global read_count
+    print("s112 Aditya Singh")
+    print(f"Reader {reader_id} is waiting...")
+
+    turnstile.acquire()
+    turnstile.release()
+
+    read_count_mutex.acquire()
+    read_count += 1
+
+    if read_count == 1:
+        resource.acquire()
+
+    read_count_mutex.release()
+
+    print(f"Reader {reader_id} is reading data = {shared_data}")
+    time.sleep(random.uniform(0.5, 1.5))
+    print(f"Reader {reader_id} finished reading.")
+
+    read_count_mutex.acquire()
+    read_count -= 1
+
+    if read_count == 0:
+        resource.release()
+
+    read_count_mutex.release()
+
+
+def writer(writer_id):
+
+    global shared_data
+
+    print(f"Writer {writer_id} is waiting...")
+
+    turnstile.acquire()
+
+    resource.acquire()
+
+    shared_data += 10
+
+    print(f"Writer {writer_id} is writing...")
+    print(f"Shared data updated to = {shared_data}")
+
+    time.sleep(random.uniform(1, 2))
+
+    print(f"Writer {writer_id} finished writing.")
+
+    resource.release()
+
+    turnstile.release()
+
+
+if __name__ == "__main__":
+
+    print("==========================================")
+    print("      READERS-WRITERS PROBLEM")
+    print("==========================================")
+
+    threads = []
+
+    r1 = threading.Thread(target=reader, args=(1,))
+    r2 = threading.Thread(target=reader, args=(2,))
+    r3 = threading.Thread(target=reader, args=(3,))
+
+    w1 = threading.Thread(target=writer, args=(1,))
+    w2 = threading.Thread(target=writer, args=(2,))
+
+    r4 = threading.Thread(target=reader, args=(4,))
+    r5 = threading.Thread(target=reader, args=(5,))
+
+    r1.start()
+    r2.start()
+
+    time.sleep(0.5)
+
+    w1.start()
+
+    time.sleep(0.5)
+
+    r3.start()
+    r4.start()
+
+    time.sleep(0.5)
+
+    w2.start()
+
+    r5.start()
+
+    r1.join()
+    r2.join()
+    r3.join()
+    r4.join()
+    r5.join()
+
+    w1.join()
+    w2.join()
+
+    print("\n==========================================")
+    print("All readers and writers completed.")
+    print("Final shared data =", shared_data)
+    print("==========================================")
